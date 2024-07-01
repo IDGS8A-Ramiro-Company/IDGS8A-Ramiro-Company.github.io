@@ -1,6 +1,6 @@
 {
-    "name": "Mi Aplicación",
-    "short_name": "MiApp",
+    "name": "PWA Integradora",
+    "short_name": "AppIntegradora",
     "start_url": "/",
     "display": "standalone",
     "theme_color": "#ffffff",
