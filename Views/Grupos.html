@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Grupos</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 1rem;
+        }
+
+        form, .modal-content {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button, textarea {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 2rem); /* Ajuste para padding y margen */
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            padding: 0.75rem;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-body {
+            margin: 1rem 0;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .edit, .delete {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 48%;
+        }
+
+        .edit:hover, .delete:hover {
+            background-color: #0056b3;
+        }
+
+        .delete {
+            background-color: #dc3545;
+        }
+
+        .delete:hover {
+            background-color: #c82333;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gestión de Grupos</h1>
+    
+    <form id="group-form">
+        <div id="error-message" class="error-message"></div>
+        <input type="hidden" id="group-id">
+        <input type="text" id="group-name" placeholder="Nombre del grupo" required>
+        <textarea id="group-description" placeholder="Descripción del grupo" required></textarea>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <div id="group-list" class="card-container">
+        <!-- Aquí se mostrarán los grupos -->
+    </div>
+
+    <!-- The Modal -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2>Editar Grupo</h2>
+            <input type="hidden" id="edit-group-id">
+            <input type="text" id="edit-group-name" placeholder="Nombre del grupo" required>
+            <textarea id="edit-group-description" placeholder="Descripción del grupo" required></textarea>
+            <button id="save-edit">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const apiUrl = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API
+
+        // Obtener y mostrar los grupos
+        function fetchGroups() {
+            axios.get(apiUrl)
+                .then(response => {
+                    const groups = response.data;
+                    const groupList = document.getElementById('group-list');
+                    groupList.innerHTML = '';
+                    groups.forEach(group => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <div class="card-header">${group.name}</div>
+                            <div class="card-body">${group.description}</div>
+                            <div class="card-footer">
+                                <button class="edit" onclick="openEditModal(${group.id}, '${group.name}', '${group.description}')">Editar</button>
+                                <button class="delete" onclick="deleteGroup(${group.id})">Eliminar</button>
+                            </div>
+                        `;
+                        groupList.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los grupos:', error);
+                });
+        }
+
+        // Validar si el grupo ya existe
+        function groupExists(name) {
+            return axios.get(apiUrl)
+                .then(response => {
+                    const groups = response.data;
+                    return groups.some(group => group.name.toLowerCase() === name.toLowerCase());
+                })
+                .catch(error => {
+                    console.error('Error al verificar la existencia del grupo:', error);
+                    return false;
+                });
+        }
+
+        // Crear un nuevo grupo
+        function createGroup(name, description) {
+            groupExists(name).then(exists => {
+                if (exists) {
+                    document.getElementById('error-message').textContent = 'El grupo ya existe.';
+                } else {
+                    document.getElementById('error-message').textContent = '';
+                    axios.post(apiUrl, {
+                        name,
+                        description
+                    })
+                    .then(response => {
+                        fetchGroups();
+                        document.getElementById('group-form').reset();
+                    })
+                    .catch(error => {
+                        console.error('Error al crear el grupo:', error);
+                    });
+                }
+            });
+        }
+
+        // Eliminar un grupo
+        function deleteGroup(id) {
+            axios.delete(apiUrl, { data: { id } })
+                .then(response => {
+                    fetchGroups();
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el grupo:', error);
+                });
+        }
+
+        // Mostrar el modal de edición
+        function openEditModal(id, name, description) {
+            document.getElementById('edit-group-id').value = id;
+            document.getElementById('edit-group-name').value = name;
+            document.getElementById('edit-group-description').value = description;
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        // Guardar cambios del modal de edición
+        function saveEdit() {
+            const id = document.getElementById('edit-group-id').value;
+            const name = document.getElementById('edit-group-name').value;
+            const description = document.getElementById('edit-group-description').value;
+
+            axios.put(`${apiUrl}`, {
+                id,
+                name,
+                description
+            })
+            .then(response => {
+                fetchGroups();
+                closeEditModal();
+            })
+            .catch(error => {
+                console.error('Error al actualizar el grupo:', error);
+            });
+        }
+
+        // Cerrar el modal de edición
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // Configurar eventos
+        document.getElementById('group-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const name = document.getElementById('group-name').value;
+            const description = document.getElementById('group-description').value;
+            createGroup(name, description);
+        });
+
+        document.getElementById('save-edit').addEventListener('click', saveEdit);
+
+        document.getElementById('close-modal').addEventListener('click', closeEditModal);
+
+        window.onclick = event => {
+            if (event.target === document.getElementById('edit-modal')) {
+                closeEditModal();
+            }
+        };
+
+        // Cargar los grupos al inicio
+        fetchGroups();
+    </script>
+</body>
+</html>
