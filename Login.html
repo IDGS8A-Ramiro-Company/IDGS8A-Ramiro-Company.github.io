@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <input type="text" id="username" placeholder="Usuario" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <button onclick="login() ">Ingresar</button>
+        <div class="error" id="error-message"></div>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('error-message');
+
+            axios.post('https://api.ejemplo.com/login', {
+                username: username,
+                password: password
+            })
+            .then(response => {
+                console.log('Respuesta del servidor:', response.data);
+                if (response.data.success) {
+                    // Redirigir al usuario a otra página
+                    window.location.href = 'dashboard.html';
+                } else {
+                    errorMessage.textContent = 'Credenciales incorrectas. Por favor, inténtelo de nuevo.';
+                }
+            })
+            .catch(error => {
+                console.error('Error al iniciar sesión:', error);
+                errorMessage.textContent = 'Hubo un problema con el inicio de sesión. Por favor, inténtelo de nuevo más tarde.';
+            });
+        }
+    </script>
+</body>
+</html>
