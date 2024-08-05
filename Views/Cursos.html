@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Cursos</title>
+    <style>
+        /* Estilos generales */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 1rem;
+        }
+
+        nav {
+            background-color: #33a559;
+            color: #fff;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 1rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        form, .modal-content {
+            max-width: 600px;
+            margin: 1rem auto;
+            padding: 1rem;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button, textarea, select {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 2rem); /* Ajuste para padding y margen */
+        }
+
+        button {
+            background-color: #33a559;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            padding: 0.75rem;
+        }
+
+        button:hover {
+            background-color: #33a559b9;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-body {
+            margin: 1rem 0;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .edit, .delete, .partials {
+            background-color: #33a559;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 30%;
+        }
+
+        .edit:hover, .delete:hover, .partials:hover {
+            background-color: #33a559;
+        }
+
+        .delete {
+            background-color: #dc3545;
+        }
+
+        .delete:hover {
+            background-color: #c82333;
+        }
+
+        .partials {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .partials:hover {
+            background-color: #e0a800;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <h1>Gestión de Cursos</h1>
+            <ul class="nav-links">
+                <li><a href="admin-dashboard.html">Inicio</a></li>
+                <li><a href="#">Gestión de Cursos</a></li>
+                <li><a href="#">Gestión de Usuarios</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <form id="course-form">
+        <div id="error-message" class="error-message"></div>
+        <input type="text" id="course-name" placeholder="Nombre del curso" required>
+        <textarea id="course-notes" placeholder="Notas del curso" required></textarea>
+        <select id="course-teacher" required>
+            <option value="">Seleccionar profesor</option>
+            <!-- Opciones de profesores se llenarán dinámicamente -->
+        </select>
+        <select id="course-group" required>
+            <option value="">Seleccionar grupo</option>
+            <!-- Opciones de grupos se llenarán dinámicamente -->
+        </select>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <div id="course-list" class="card-container">
+        <!-- Aquí se mostrarán los cursos -->
+    </div>
+
+    <!-- The Modal for Edit Course -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h2>Editar Curso</h2>
+            <input type="hidden" id="edit-course-id">
+            <input type="text" id="edit-course-name" placeholder="Nombre del curso" required>
+            <textarea id="edit-course-notes" placeholder="Notas del curso" required></textarea>
+            <select id="edit-course-teacher" required>
+                <option value="">Seleccionar profesor</option>
+                <!-- Opciones de profesores se llenarán dinámicamente -->
+            </select>
+            <select id="edit-course-group" required>
+                <option value="">Seleccionar grupo</option>
+                <!-- Opciones de grupos se llenarán dinámicamente -->
+            </select>
+            <button id="save-edit">Guardar Cambios</button>
+        </div>
+    </div>
+
+    <!-- The Modal for Partials -->
+    <div id="partials-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-partials-modal">&times;</span>
+            <h2>Gestionar Parciales</h2>
+            <input type="hidden" id="partials-course-id">
+            <input type="text" id="partial-name" placeholder="Nombre del parcial" required>
+            <button id="add-partial">Agregar Parcial</button>
+            <div id="partials-list">
+                <!-- Aquí se mostrarán los parciales -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        const apiUrlCourses = 'http://54.163.22.51/api/v1/courses'; // Reemplaza con la URL de tu API de cursos
+        const apiUrlTeachers = 'http://54.163.22.51/api/v1/teachers'; // Reemplaza con la URL de tu API de profesores
+        const apiUrlGroups = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API de grupos
+        const apiUrlPartials = 'http://54.163.22.51/api/v1/partials'; // Reemplaza con la URL de tu API de parciales
+
+        // Obtener y mostrar los cursos
+        function fetchCourses() {
+            axios.get(apiUrlCourses)
+                .then(response => {
+                    const courses = response.data;
+                    const courseList = document.getElementById('course-list');
+                    courseList.innerHTML = '';
+                    courses.forEach(course => {
+                        const card = document.createElement('div');
+                        card.classList.add('card');
+                        card.innerHTML = `
+                            <div class="card-header">${course.name}</div>
+                            <div class="card-body">${course.notes}</div>
+                            <div class="card-footer">
+                                <button class="edit" onclick="openEditModal(${course.id}, '${course.name}', '${course.notes}', ${course.id_teacher}, ${course.group_id})">Editar</button>
+                                <button class="delete" onclick="deleteCourse(${course.id})">Eliminar</button>
+                                <button class="partials" onclick="openPartialsModal(${course.id})">Parciales</button>
+                            </div>
+                        `;
+                        courseList.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los cursos:', error);
+                });
+        }
+
+        // Obtener opciones para profesores y grupos
+        function fetchOptions() {
+            axios.get(apiUrlTeachers)
+                .then(response => {
+                    const teachers = response.data;
+                    const teacherSelect = document.getElementById('course-teacher');
+                    const editTeacherSelect = document.getElementById('edit-course-teacher');
+                    teachers.forEach(teacher => {
+                        const option = document.createElement('option');
+                        option.value = teacher.id;
+                        option.textContent = teacher.name;
+                        teacherSelect.appendChild(option);
+
+                        const editOption = document.createElement('option');
+                        editOption.value = teacher.id;
+                        editOption.textContent = teacher.name;
+                        editTeacherSelect.appendChild(editOption);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los profesores:', error);
+                });
+
+            axios.get(apiUrlGroups)
+                .then(response => {
+                    const groups = response.data;
+                    const groupSelect = document.getElementById('course-group');
+                    const editGroupSelect = document.getElementById('edit-course-group');
+                    groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.name;
+                        groupSelect.appendChild(option);
+
+                        const editOption = document.createElement('option');
+                        editOption.value = group.id;
+                        editOption.textContent = group.name;
+                        editGroupSelect.appendChild(editOption);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los grupos:', error);
+                });
+        }
+
+        // Crear un nuevo curso
+        function createCourse(name, notes, id_teacher, group_id) {
+            courseExists(name, id_teacher, group_id).then(exists => {
+                if (exists) {
+                    document.getElementById('error-message').textContent = 'El curso ya existe.';
+                } else {
+                    document.getElementById('error-message').textContent = '';
+                    axios.post(apiUrlCourses, {
+                        name,
+                        notes,
+                        id_teacher,
+                        group_id
+                    })
+                    .then(response => {
+                        fetchCourses();
+                        document.getElementById('course-form').reset();
+                    })
+                    .catch(error => {
+                        console.error('Error al crear el curso:', error);
+                        document.getElementById('error-message').textContent = 'Error al crear el curso.';
+                    });
+                }
+            });
+        }
+
+        // Validar si el curso ya existe
+        function courseExists(name, id_teacher, group_id) {
+            return axios.get(apiUrlCourses)
+                .then(response => {
+                    const courses = response.data;
+                    return courses.some(course => course.name === name && course.id_teacher === id_teacher && course.group_id === group_id);
+                })
+                .catch(error => {
+                    console.error('Error al verificar la existencia del curso:', error);
+                    return false;
+                });
+        }
+
+        // Eliminar un curso
+        function deleteCourse(id) {
+            axios.delete(apiUrlCourses, { data: { id } })
+                .then(response => {
+                    fetchCourses();
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el curso:', error);
+                    document.getElementById('error-message').textContent = 'Error al eliminar el curso.';
+                });
+        }
+
+        // Mostrar el modal de edición
+        function openEditModal(id, name, notes, id_teacher, group_id) {
+            document.getElementById('edit-course-id').value = id;
+            document.getElementById('edit-course-name').value = name;
+            document.getElementById('edit-course-notes').value = notes;
+            document.getElementById('edit-course-teacher').value = id_teacher;
+            document.getElementById('edit-course-group').value = group_id;
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        // Guardar cambios del modal de edición
+        function saveEdit() {
+            const id = document.getElementById('edit-course-id').value;
+            const name = document.getElementById('edit-course-name').value;
+            const notes = document.getElementById('edit-course-notes').value;
+            const id_teacher = document.getElementById('edit-course-teacher').value;
+            const group_id = document.getElementById('edit-course-group').value;
+
+            axios.put(apiUrlCourses, {
+                id,
+                name,
+                notes,
+                id_teacher,
+                group_id
+            })
+            .then(response => {
+                fetchCourses();
+                closeEditModal();
+            })
+            .catch(error => {
+                console.error('Error al actualizar el curso:', error);
+                document.getElementById('error-message').textContent = 'Error al actualizar el curso.';
+            });
+        }
+
+        // Cerrar el modal de edición
+        function closeEditModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        // Abrir el modal de parciales
+        function openPartialsModal(course_id) {
+            document.getElementById('partials-course-id').value = course_id;
+            document.getElementById('partials-modal').style.display = 'block';
+            fetchPartials(course_id);
+        }
+
+        // Cerrar el modal de parciales
+        function closePartialsModal() {
+            document.getElementById('partials-modal').style.display = 'none';
+        }
+
+        // Crear un nuevo parcial
+        function createPartial(name, course_id) {
+            partialExists(name, course_id).then(exists => {
+                if (exists) {
+                    document.getElementById('error-message').textContent = 'El parcial ya existe.';
+                } else {
+                    document.getElementById('error-message').textContent = '';
+                    axios.post(apiUrlPartials, {
+                        name,
+                        course_id
+                    })
+                    .then(response => {
+                        fetchPartials(course_id);
+                        document.getElementById('partial-name').value = '';
+                    })
+                    .catch(error => {
+                        console.error('Error al crear el parcial:', error);
+                        document.getElementById('error-message').textContent = 'Error al crear el parcial.';
+                    });
+                }
+            });
+        }
+
+        // Validar si el parcial ya existe
+        function partialExists(name, course_id) {
+            return axios.get(apiUrlPartials)
+                .then(response => {
+                    const partials = response.data;
+                    return partials.some(partial => partial.name === name && partial.course_id === course_id);
+                })
+                .catch(error => {
+                    console.error('Error al verificar la existencia del parcial:', error);
+                    return false;
+                });
+        }
+
+        // Obtener y mostrar los parciales
+        function fetchPartials(course_id) {
+            axios.get(`${apiUrlPartials}?course_id=${course_id}`)
+                .then(response => {
+                    const partials = response.data;
+                    const partialsList = document.getElementById('partials-list');
+                    partialsList.innerHTML = '';
+                    partials.forEach(partial => {
+                        const div = document.createElement('div');
+                        div.classList.add('card');
+                        div.innerHTML = `
+                            <div class="card-header">${partial.name}</div>
+                            <div class="card-footer">
+                                <button class="delete" onclick="deletePartial(${partial.id})">Eliminar</button>
+                            </div>
+                        `;
+                        partialsList.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los parciales:', error);
+                });
+        }
+
+        // Eliminar un parcial
+        function deletePartial(id) {
+            axios.delete(apiUrlPartials, { data: { id } })
+                .then(response => {
+                    const course_id = document.getElementById('partials-course-id').value;
+                    fetchPartials(course_id);
+                })
+                .catch(error => {
+                    console.error('Error al eliminar el parcial:', error);
+                    document.getElementById('error-message').textContent = 'Error al eliminar el parcial.';
+                });
+        }
+
+        // Configurar eventos
+        document.getElementById('course-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const name = document.getElementById('course-name').value;
+            const notes = document.getElementById('course-notes').value;
+            const id_teacher = document.getElementById('course-teacher').value;
+            const group_id = document.getElementById('course-group').value;
+            createCourse(name, notes, id_teacher, group_id);
+        });
+
+        document.getElementById('save-edit').addEventListener('click', saveEdit);
+
+        document.getElementById('close-modal').addEventListener('click', closeEditModal);
+
+        document.getElementById('add-partial').addEventListener('click', () => {
+            const name = document.getElementById('partial-name').value;
+            const course_id = document.getElementById('partials-course-id').value;
+            createPartial(name, course_id);
+        });
+
+        document.getElementById('close-partials-modal').addEventListener('click', closePartialsModal);
+
+        // Inicialización
+        fetchCourses();
+        fetchOptions();
+    </script>
+</body>
+</html>
