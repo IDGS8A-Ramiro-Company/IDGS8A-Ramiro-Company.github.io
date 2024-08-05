@@ -15,8 +15,43 @@
 
         h1 {
             text-align: center;
-            color: #333;
+            color: #ffffff;
             margin-top: 1rem;
+        }
+
+        nav {
+            background-color: #33a559;
+            color: #fff;
+            padding: 0.5rem 1rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 1rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
         }
 
         form, .modal-content {
@@ -37,7 +72,7 @@
         }
 
         button {
-            background-color: #007BFF;
+            background-color: #33a559;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -47,7 +82,7 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #33a559b9;
         }
 
         .card-container {
@@ -85,7 +120,7 @@
         }
 
         .edit, .delete {
-            background-color: #007BFF;
+            background-color: #33a559;
             color: #fff;
             border: none;
             border-radius: 4px;
@@ -96,7 +131,7 @@
         }
 
         .edit:hover, .delete:hover {
-            background-color: #0056b3;
+            background-color: #33a559;
         }
 
         .delete {
@@ -152,8 +187,17 @@
     </style>
 </head>
 <body>
-    <h1>Gestión de Grupos</h1>
-    
+    <nav>
+        <div class="nav-container">
+            <h1>Gestión de Grupos</h1>
+            <ul class="nav-links">
+                <li><a href="admin-dashboard.html">Inicio</a></li>
+                <li><a href="#">Gestión de Grupos</a></li>
+                <li><a href="#">Gestión de Usuarios</a></li>
+            </ul>
+        </div>
+    </nav>
+
     <form id="group-form">
         <div id="error-message" class="error-message"></div>
         <input type="hidden" id="group-id">
@@ -202,9 +246,11 @@
                         `;
                         groupList.appendChild(card);
                     });
+                    document.getElementById('error-message').textContent = ''; // Limpiar mensaje de error
                 })
                 .catch(error => {
                     console.error('Error al obtener los grupos:', error);
+                    document.getElementById('error-message').textContent = 'Error al obtener los grupos.';
                 });
         }
 
@@ -238,6 +284,7 @@
                     })
                     .catch(error => {
                         console.error('Error al crear el grupo:', error);
+                        document.getElementById('error-message').textContent = 'Error al crear el grupo.';
                     });
                 }
             });
@@ -251,6 +298,7 @@
                 })
                 .catch(error => {
                     console.error('Error al eliminar el grupo:', error);
+                    document.getElementById('error-message').textContent = 'Error al eliminar el grupo.';
                 });
         }
 
@@ -268,7 +316,7 @@
             const name = document.getElementById('edit-group-name').value;
             const description = document.getElementById('edit-group-description').value;
 
-            axios.put(`${apiUrl}`, {
+            axios.put(apiUrl, {
                 id,
                 name,
                 description
@@ -279,6 +327,7 @@
             })
             .catch(error => {
                 console.error('Error al actualizar el grupo:', error);
+                document.getElementById('error-message').textContent = 'Error al actualizar el grupo.';
             });
         }
 
