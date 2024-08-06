@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Grupos</title>
+    <title>Gestión de Alumnos</title>
     <style>
         /* Estilos generales */
         body {
@@ -98,7 +98,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 1rem;
-            width: 300px;
+            width: 500px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -172,6 +172,20 @@
             font-weight: bold;
         }
 
+        .dropdown-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button, textarea, select {
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 2rem);
+        }
         .close:hover,
         .close:focus {
             color: black;
@@ -193,20 +207,12 @@
             <ul class="nav-links">
                 <li><a href="admin-dashboard.html">Inicio</a></li>
                 <li><a href="Grupos.html">Gestión de Grupos</a></li>
-                <li><a href="Alumnos.html">Gestión de Usuarios</a></li>
-                <li><a href="Cursos.html">Gestión de Cursos</a></li>
-                <li><a onclick="logout()">Cerrar Sesion</a></li>
+                <li><a href="Alumnos.html">Gestión de Alumnos</a></li>
+                <li><a href="Registrar.html">Registrar nuevo usuario</a></li>
             </ul>
         </div>
     </nav>
 
-    <form id="group-form">
-        <div id="error-message" class="error-message"></div>
-        <input type="hidden" id="group-id">
-        <input type="text" id="group-name" placeholder="Nombre del grupo" required>
-        <textarea id="group-description" placeholder="Descripción del grupo" required></textarea>
-        <button type="submit">Guardar</button>
-    </form>
 
     <div id="group-list" class="card-container">
         <!-- Aquí se mostrarán los grupos -->
@@ -216,91 +222,83 @@
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <span class="close" id="close-modal">&times;</span>
-            <h2>Editar Grupo</h2>
+            <h2>Editar Alumno</h2>
             <input type="hidden" id="edit-group-id">
-            <input type="text" id="edit-group-name" placeholder="Nombre del grupo" required>
-            <textarea id="edit-group-description" placeholder="Descripción del grupo" required></textarea>
+            <input readonly type="text" id="edit-group-name" placeholder="Nombre del grupo" required>
+            <textarea readonly id="edit-group-description" placeholder="Descripción del grupo" required></textarea>
+            <select id="edit-course-teacher" required>
+                <option value="">Seleccionar Grupo</option>
+            </select>
             <button id="save-edit">Guardar Cambios</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        const apiUrl = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API
-
-        // Obtener y mostrar los grupos
-        function fetchGroups() {
-            axios.get(apiUrl)
+        const apiUrl = 'http://54.163.22.51/api/v1/students'; // Reemplaza con la URL de tu API
+        const apiUrlGroups = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API
+        const apiUrlGroupsStudent = 'http://54.163.22.51/api/v1/groupStudent'; // Reemplaza con la URL de tu API
+        function fetchGroups(){
+            axios.get(apiUrlGroups)
                 .then(response => {
                     const groups = response.data;
-                    const groupList = document.getElementById('group-list');
-                    groupList.innerHTML = '';
+                    console.log(groups);
+                    const groupSelect = document.getElementById('course-teacher');
+                    const editGroupSelect = document.getElementById('edit-course-teacher');
+                    editGroupSelect.innerHTML='';
                     groups.forEach(group => {
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <div class="card-header">${group.name}</div>
-                            <div class="card-body">${group.description}</div>
-                            <div class="card-footer">
-                                <button class="edit" onclick="openEditModal(${group.id}, '${group.name}', '${group.description}')">Editar</button>
-                                <button class="delete" onclick="deleteGroup(${group.id})">Eliminar</button>
-                            </div>
-                        `;
-                        groupList.appendChild(card);
+                        const option = document.createElement('option');
+                        option.value = group.id;
+                        option.textContent = group.name;
+
+                        const editOption = document.createElement('option');
+                        editOption.value = group.id;
+                        editOption.textContent = group.name;
+                        editGroupSelect.appendChild(editOption);
                     });
-                    document.getElementById('error-message').textContent = ''; // Limpiar mensaje de error
                 })
                 .catch(error => {
                     console.error('Error al obtener los grupos:', error);
-                    document.getElementById('error-message').textContent = 'Error al obtener los grupos.';
                 });
         }
-
-        // Validar si el grupo ya existe
-        function groupExists(name) {
-            return axios.get(apiUrl)
+        function fetchStudents() {
+            axios.get(apiUrl)
                 .then(response => {
-                    const groups = response.data;
-                    return groups.some(group => group.name.toLowerCase() === name.toLowerCase());
+                    const students = response.data;
+                    const studentList = document.getElementById('group-list');
+                    studentList.innerHTML = '';
+                    students.forEach(student => {
+                        const groups = student.group;
+                        const group = groups.length > 0 ? groups[0].name : "No tiene grupo asignado";
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <div class="card-header">${student.name}</div>
+                            <div class="card-body">${student.email}</div>
+                            <div class="card-body">${group}</div>
+                            <div class="card-footer">
+                                <button class="edit" onclick="openEditModal(${student.id}, '${student.name}', '${student.email}')">Editar</button>
+                                <button class="delete" onclick="deleteGroup(${student.id})">Eliminar</button>
+                            </div>
+                        `;
+                        studentList.appendChild(card);
+                    });
                 })
                 .catch(error => {
-                    console.error('Error al verificar la existencia del grupo:', error);
-                    return false;
+                    console.error('Error al obtener los alumnos:', error);
                 });
         }
 
-        // Crear un nuevo grupo
-        function createGroup(name, description) {
-            groupExists(name).then(exists => {
-                if (exists) {
-                    document.getElementById('error-message').textContent = 'El grupo ya existe.';
-                } else {
-                    document.getElementById('error-message').textContent = '';
-                    axios.post(apiUrl, {
-                        name,
-                        description
-                    })
-                    .then(response => {
-                        fetchGroups();
-                        document.getElementById('group-form').reset();
-                    })
-                    .catch(error => {
-                        console.error('Error al crear el grupo:', error);
-                        document.getElementById('error-message').textContent = 'Error al crear el grupo.';
-                    });
-                }
-            });
-        }
 
         // Eliminar un grupo
         function deleteGroup(id) {
             axios.delete(apiUrl, { data: { id } })
                 .then(response => {
-                    fetchGroups();
+                    fetchStudents();
                 })
                 .catch(error => {
                     console.error('Error al eliminar el grupo:', error);
-                    document.getElementById('error-message').textContent = 'Error al eliminar el grupo.';
+                    document.getElementById('error-message').textContent = 'Error al eliminar el alumno.';
                 });
         }
 
@@ -310,41 +308,43 @@
             document.getElementById('edit-group-name').value = name;
             document.getElementById('edit-group-description').value = description;
             document.getElementById('edit-modal').style.display = 'block';
+            fetchGroups();
         }
 
         // Guardar cambios del modal de edición
         function saveEdit() {
             const id = document.getElementById('edit-group-id').value;
             const name = document.getElementById('edit-group-name').value;
-            const description = document.getElementById('edit-group-description').value;
-
-            axios.put(apiUrl, {
-                id,
-                name,
-                description
+            const email = document.getElementById('edit-group-description').value;
+            const group = parseInt(document.getElementById('edit-course-teacher').value);
+            console.log(id)
+            axios.post(apiUrlGroupsStudent, {
+                student_id: id,
+                group_id: group
             })
-            .then(response => {
-                fetchGroups();
-                closeEditModal();
-            })
-            .catch(error => {
-                console.error('Error al actualizar el grupo:', error);
-                document.getElementById('error-message').textContent = 'Error al actualizar el grupo.';
-            });
+                .then(response => {
+                    fetchStudents();
+                    closeEditModal();
+                })
+                .catch(error => {
+                    console.error('Error al modificar el alumno:', error);
+                });
+            //axios.put(apiUrl + `/${id}`,{
+            //    name:name,
+            //    email:email
+            //})
+            //    .then(response=>{
+            //        fetchStudents();
+            //    })
+            //    .catch(error=>{
+            //        console.error('error',error);
+            //    });
         }
 
         // Cerrar el modal de edición
         function closeEditModal() {
             document.getElementById('edit-modal').style.display = 'none';
         }
-
-        // Configurar eventos
-        document.getElementById('group-form').addEventListener('submit', event => {
-            event.preventDefault();
-            const name = document.getElementById('group-name').value;
-            const description = document.getElementById('group-description').value;
-            createGroup(name, description);
-        });
 
         document.getElementById('save-edit').addEventListener('click', saveEdit);
 
@@ -356,15 +356,8 @@
             }
         };
 
-        function logout() {
-            
-            localStorage.removeItem('token'); 
-            sessionStorage.removeItem('token'); 
-            window.location.href = 'http://localhost/IDGS8A-Ramiro-Company.github.io/login.html'; 
-        }
-
-        // Cargar los grupos al inicio
-        fetchGroups();
+        // Cargar los estudiantes al inicio
+        fetchStudents();
     </script>
 </body>
 </html>
