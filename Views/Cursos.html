@@ -119,7 +119,7 @@
             justify-content: space-between;
         }
 
-        .edit, .delete, .partials {
+        .edit, .delete, .partials, .activities {
             background-color: #33a559;
             color: #fff;
             border: none;
@@ -201,8 +201,10 @@
             <h1>Gestión de Cursos</h1>
             <ul class="nav-links">
                 <li><a href="admin-dashboard.html">Inicio</a></li>
-                <li><a href="#">Gestión de Cursos</a></li>
-                <li><a href="#">Gestión de Usuarios</a></li>
+                <li><a href="Grupos.html">Gestión de Grupos</a></li>
+                <li><a href="RegistroUsuarios.html">Gestión de Usuarios</a></li>
+                <li><a href="Cursos.html">Gestión de Cursos</a></li>
+                <li><a onclick="logout()">Cerrar Sesion</a></li>
             </ul>
         </div>
     </nav>
@@ -260,6 +262,21 @@
         </div>
     </div>
 
+
+        <!-- The Modal for Activities -->
+        <div id="activities-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="close-activities-modal">&times;</span>
+                <h2>Gestionar Actividades</h2>
+                <input type="hidden" id="activities-course-id">
+                <input type="text" id="activitie-name" placeholder="Nombre del parcial" required>
+                <button id="add-activitie">Agregar Actividad</button>
+                <div id="activities-list">
+                    <!-- Aquí se mostrarán los parciales -->
+                </div>
+            </div>
+        </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const apiUrlCourses = 'http://54.163.22.51/api/v1/courses'; // Reemplaza con la URL de tu API de cursos
@@ -284,6 +301,7 @@
                                 <button class="edit" onclick="openEditModal(${course.id}, '${course.name}', '${course.notes}', ${course.id_teacher}, ${course.group_id})">Editar</button>
                                 <button class="delete" onclick="deleteCourse(${course.id})">Eliminar</button>
                                 <button class="partials" onclick="openPartialsModal(${course.id})">Parciales</button>
+                                
                             </div>
                         `;
                         courseList.appendChild(card);
@@ -436,9 +454,19 @@
             fetchPartials(course_id);
         }
 
+        // Abrir el modal de actividades        
+        function openActivitiesModal(course_id) {
+            document.getElementById('partials-course-id').value = course_id;
+            document.getElementById('activities-modal').style.display = 'block';
+            // fetchPartials(course_id);
+        }
         // Cerrar el modal de parciales
         function closePartialsModal() {
             document.getElementById('partials-modal').style.display = 'none';
+        }
+        // Cerrar el modal de activities
+        function closeActivitiesModal() {
+            document.getElementById('activities-modal').style.display = 'none';
         }
 
         // Crear un nuevo parcial
@@ -479,8 +507,10 @@
 
         // Obtener y mostrar los parciales
         function fetchPartials(course_id) {
-            axios.get(`${apiUrlPartials}?course_id=${course_id}`)
+            // axios.get(`${apiUrlPartials}?course_id=${course_id}`)
+            axios.get(`${apiUrlCourses}/${course_id}/partials`)
                 .then(response => {
+                    console.log(response);
                     const partials = response.data;
                     const partialsList = document.getElementById('partials-list');
                     partialsList.innerHTML = '';
@@ -491,9 +521,11 @@
                             <div class="card-header">${partial.name}</div>
                             <div class="card-footer">
                                 <button class="delete" onclick="deletePartial(${partial.id})">Eliminar</button>
+                                <button class="activities" onclick="openActivitiesModal(${partial.id})">Actividades</button>
                             </div>
                         `;
                         partialsList.appendChild(div);
+                        console.log()
                     });
                 })
                 .catch(error => {
@@ -535,7 +567,15 @@
         });
 
         document.getElementById('close-partials-modal').addEventListener('click', closePartialsModal);
+        document.getElementById('close-activities-modal').addEventListener('click', closeActivitiesModal);
 
+
+        function logout() {
+            
+            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); 
+            window.location.href = 'http://localhost/IDGS8A-Ramiro-Company.github.io/login.html'; 
+        }
         // Inicialización
         fetchCourses();
         fetchOptions();

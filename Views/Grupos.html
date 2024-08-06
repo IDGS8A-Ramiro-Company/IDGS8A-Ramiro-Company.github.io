@@ -192,9 +192,10 @@
             <h1>Gestión de Grupos</h1>
             <ul class="nav-links">
                 <li><a href="admin-dashboard.html">Inicio</a></li>
-                <li><a href="#">Gestión de Grupos</a></li>
-                <li><a href="#">Gestión de Usuarios</a></li>
+                <li><a href="Grupos.html">Gestión de Grupos</a></li>
+                <li><a href="RegistroUsuarios.html">Gestión de Usuarios</a></li>
                 <li><a href="Cursos.html">Gestión de Cursos</a></li>
+                <li><a onclick="logout()">Cerrar Sesion</a></li>
             </ul>
         </div>
     </nav>
@@ -354,6 +355,13 @@
                 closeEditModal();
             }
         };
+
+        function logout() {
+            
+            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); 
+            window.location.href = 'http://localhost/IDGS8A-Ramiro-Company.github.io/login.html'; 
+        }
 
         // Cargar los grupos al inicio
         fetchGroups();
