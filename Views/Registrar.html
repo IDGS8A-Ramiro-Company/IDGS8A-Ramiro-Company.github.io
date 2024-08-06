@@ -7,13 +7,53 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         /* Estilos generales */
+
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-top: 1rem;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #f0f2f5;
         }
+        nav {
+            background-color: #33a559;
+            color: #fff;
+            padding: 0.5rem 1rem;
+        }
 
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        .nav-links li {
+            margin: 0 1rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
         main {
             padding: 2rem;
             max-width: 600px;
@@ -23,10 +63,6 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            color: #333;
-            text-align: center;
-        }
 
         form {
             display: flex;
@@ -87,8 +123,19 @@
     </style>
 </head>
 <body>
+<nav>
+    <div class="nav-container">
+        <h1>Gestión de Grupos</h1>
+        <ul class="nav-links">
+            <li><a href="admin-dashboard.html">Inicio</a></li>
+            <li><a href="Grupos.html">Gestión de Grupos</a></li>
+            <li><a href="Alumnos.html">Gestión de Alumnos</a></li>
+            <li><a href="Registrar.html">Registrar nuevo usuario</a></li>
+        </ul>
+    </div>
+</nav>
     <main>
-        <h1>Registro de Usuario</h1>
+        <h1 style="color: #333333">Registro de Usuario</h1>
         <form id="register-form">
             <label for="name">Nombre</label>
             <input type="text" id="name" name="name" required>
@@ -102,8 +149,8 @@
             <label for="id_rol">Rol</label>
             <select id="id_rol" name="id_rol" required>
                 <option value="1">Administrador</option>
-                <option value="2">Alumno</option>
-                <option value="3">Profesor</option>
+                <option value="3">Alumno</option>
+                <option value="2">Profesor</option>
             </select>
 
             <button type="submit">Registrarse</button>
