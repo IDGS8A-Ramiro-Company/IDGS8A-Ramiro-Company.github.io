@@ -213,6 +213,26 @@
             font-size: 0.9rem;
             margin-bottom: 1rem;
         }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* Custom styling for the progress bar */
+        .progress-bar::-webkit-progress-bar {
+            background-color: #f3f3f3;
+            border-radius: 5px;
+        }
+        .progress-bar::-webkit-progress-value {
+            background-color: #4caf50;
+            border-radius: 5px;
+        }
+        .progress-bar::-moz-progress-bar {
+            background-color: #4caf50;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
@@ -289,9 +309,10 @@
         <div class="modal-content">
             <span class="close" id="close-activities-modal">&times;</span>
             <h2>Gestionar Actividades</h2>
-            <input type="hidden" id="activities-course-id">
-            <input type="text" id="activitie-name" placeholder="Nombre del parcial" required>
-            <button id="add-activitie">Agregar Actividad</button>
+            <input type="hidden" id="activities-partial-id">
+            <input type="text" id="activitie-name" placeholder="Nombre actividad" required>
+            <input type="text" id="description-activitie" placeholder="Descripción actividad" required>
+            <button id="add-activities">Agregar Actividad</button>
             <div id="activities-list">
                 <!-- Aquí se mostrarán los parciales -->
             </div>
@@ -304,7 +325,7 @@
         const apiUrlTeachers = 'http://54.163.22.51/api/v1/teachers'; // Reemplaza con la URL de tu API de profesores
         const apiUrlGroups = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API de grupos
         const apiUrlPartials = 'http://54.163.22.51/api/v1/partials'; // Reemplaza con la URL de tu API de parciales
-        const apiUrlActivities = 'http://54.163.22.51/api/v1/partials/id/activities'; // Reemplaza con la URL de tu API de parciales
+        const apiUrlActivities = 'http://54.163.22.51/api/v1/activities'; // Reemplaza con la URL de tu API de parciales
 
         // Obtener y mostrar los cursos
         function fetchCourses() {
@@ -319,12 +340,17 @@
                         card.innerHTML = `
                             <div class="card-header">${course.name}</div>
                             <div class="card-body">${course.notes}</div>
-                            <div class="card-body">${course.group.name}</div>
-                            <div class="card-body">${course.teacher.name}</div>
+                            <div class="card-body">Grupo: ${course.group.name}</div>
+                            <div class="card-body">Profesor: ${course.teacher.name}</div>
+                            <div class="card-body"><progress class="progress-bar" value="${course.progress}" max="100"></progress></div>
+                            
+                            
                             <div class="card-footer">
+                                
                                 <button class="edit" onclick="openEditModal(${course.id}, '${course.name}', '${course.notes}', ${course.id_teacher}, ${course.group_id})">Editar</button>
                                 <button class="delete" onclick="deleteCourse(${course.id})">Eliminar</button>
                                 <button class="partials" onclick="openPartialsModal(${course.id})">Parciales</button>
+                                
                                 
                             </div>
                         `;
@@ -481,10 +507,10 @@
         }
 
         // Abrir el modal de actividades        
-        function openActivitiesModal(course_id) {
-            document.getElementById('partials-course-id').value = course_id;
+        function openActivitiesModal(partial_id) {
+            document.getElementById('activities-partial-id').value = partial_id;
             document.getElementById('activities-modal').style.display = 'block';
-            fetchActivities(course_id);
+            fetchActivities(partial_id);
         }
         // Cerrar el modal de parciales
         function closePartialsModal() {
@@ -493,6 +519,7 @@
         // Cerrar el modal de activities
         function closeActivitiesModal() {
             document.getElementById('activities-modal').style.display = 'none';
+            document.getElementById('partials-modal').style.display = 'none';
         }
 
         // Crear un nuevo parcial
@@ -512,6 +539,51 @@
                 });
         }
 
+        function createActivities(name, description, partial_id) {
+            document.getElementById('error-message').textContent = '';
+            axios.post(apiUrlActivities, {
+                name,
+                description,
+                partial_id
+                
+            })
+                .then(response => {
+                    fetchActivities(partial_id);
+                    document.getElementById('activitie-name').value = '';
+                })
+                .catch(error => {
+                    console.error('Error al crear el actividad:', error);
+                    document.getElementById('error-message').textContent = 'Error al crear actividad.';
+                });
+                console.log(partial_id);
+        }
+        
+        function fetchActivities(partial_id) {
+            // axios.get(`${apiUrlPartials}?course_id=${course_id}`)            
+            axios.get(`${apiUrlPartials}/${partial_id}/activities`)
+                .then(response => {
+                    console.log(response);
+                    const activities = response.data;
+                    const activitiesList = document.getElementById('activities-list');
+                    activitiesList.innerHTML = '';
+                    activities.forEach(activitie => {
+                        const div = document.createElement('div');
+                        div.classList.add('card');
+                        div.innerHTML = `
+                            <div class="card-header">${activitie.name}</div>
+                            <div class="card-footer">
+                                <div class="card-body">${activitie.description}</div>
+                                <button class="delete" onclick="deleteActivitie(${activitie.id})">Eliminar</button>                                
+                            </div>
+                        `;
+                        activitiesList.appendChild(div);
+                        console.log()
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener los parciales:', error);
+                });
+        }
 
 
         // Validar si el parcial ya existe
@@ -556,36 +628,22 @@
         }
 
 
-
-        function fetchActivities(course_id) {
-            // axios.get(`${apiUrlPartials}?course_id=${course_id}`)
-            axios.get(`${apiUrlCourses}/${course_id}/partials`)
+        // Eliminar una actividad de un parcial
+        function deleteActivitie(id) {
+            axios.delete(apiUrlActivities, { data: { id } })
                 .then(response => {
-                    console.log(response);
-                    const partials = response.data;
-                    const partialsList = document.getElementById('partials-list');
-                    partialsList.innerHTML = '';
-                    partials.forEach(partial => {
-                        const div = document.createElement('div');
-                        div.classList.add('card');
-                        div.innerHTML = `
-                            <div class="card-header">${partial.name}</div>
-                            <div class="card-footer">
-                                <button class="delete" onclick="deletePartial(${partial.id})">Eliminar</button>
-                                <button class="activities" onclick="openActivitiesModal(${partial.id})">Actividades</button>
-                            </div>
-                        `;
-                        partialsList.appendChild(div);
-                        console.log()
-                    });
+                    const partial_id = document.getElementById('activities-partial-id').value;
+                    fetchActivities(partial_id);
                 })
                 .catch(error => {
-                    console.error('Error al obtener los parciales:', error);
+                    console.error('Error al eliminar el actividad:', error);
+                    document.getElementById('error-message').textContent = 'Error al eliminar el actividad.';
                 });
+                
         }
 
-        // Eliminar un parcial
-        function deletePartial(id) {
+                // Eliminar un parcial
+                function deletePartial(id) {
             axios.delete(apiUrlPartials, { data: { id } })
                 .then(response => {
                     const course_id = document.getElementById('partials-course-id').value;
@@ -616,6 +674,15 @@
             const course_id = document.getElementById('partials-course-id').value;
             createPartial(name, course_id);
         });
+        
+        document.getElementById('add-activities').addEventListener('click', () => {
+            const name = document.getElementById('activitie-name').value;
+            const partial_id = document.getElementById('activities-partial-id').value;
+            const description= document.getElementById('description-activitie').value;
+            
+            createActivities(name,description, partial_id);
+        });
+
 
         document.getElementById('close-partials-modal').addEventListener('click', closePartialsModal);
         document.getElementById('close-activities-modal').addEventListener('click', closeActivitiesModal);
