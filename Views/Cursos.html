@@ -300,11 +300,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        const apiUrlCourses = 'http://54.163.22.51/api/v1/courses'; // Reemplaza con la URL de tu API de cursos
-        const apiUrlTeachers = 'http://54.163.22.51/api/v1/teachers'; // Reemplaza con la URL de tu API de profesores
-        const apiUrlGroups = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API de grupos
-        const apiUrlPartials = 'http://54.163.22.51/api/v1/partials'; // Reemplaza con la URL de tu API de parciales
-        const apiUrlActivities = 'http://54.163.22.51/api/v1/partials/id/activities'; // Reemplaza con la URL de tu API de parciales
+        const apiUrlCourses = 'https://54.163.22.51/api/v1/courses'; // Reemplaza con la URL de tu API de cursos
+        const apiUrlTeachers = 'https://54.163.22.51/api/v1/teachers'; // Reemplaza con la URL de tu API de profesores
+        const apiUrlGroups = 'https://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API de grupos
+        const apiUrlPartials = 'https://54.163.22.51/api/v1/partials'; // Reemplaza con la URL de tu API de parciales
+        const apiUrlActivities = 'https://54.163.22.51/api/v1/partials/id/activities'; // Reemplaza con la URL de tu API de parciales
 
         // Obtener y mostrar los cursos
         function fetchCourses() {
@@ -625,7 +625,7 @@
 
             localStorage.removeItem('token');
             sessionStorage.removeItem('token');
-            window.location.href = 'http://localhost/IDGS8A-Ramiro-Company.github.io/login.html';
+            window.location.href = 'https://idgs8a-ramiro-company.github.io/Login.html';
         }
         // Inicialización
         fetchCourses();
