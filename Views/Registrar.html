@@ -149,8 +149,8 @@
             <label for="id_rol">Rol</label>
             <select id="id_rol" name="id_rol" required>
                 <option value="1">Administrador</option>
-                <option value="3">Alumno</option>
-                <option value="2">Profesor</option>
+                <option value="2">Alumno</option>
+                <option value="3">Profesor</option>
             </select>
 
             <button type="submit">Registrarse</button>
@@ -187,9 +187,8 @@
                 id_rol: id_rol
             })
             .then(response => {
-                message.textContent = 'Registro exitoso. Por favor, inicie sesión.';
-                message.style.color = 'green';
-                loginButton.style.display = 'block'; // Mostrar botón de iniciar sesión
+                message.textContent = 'Registro exitoso.';
+                message.style.color = 'green';                
             })
             .catch(error => {
                 console.error('Error al registrar usuario:', error);

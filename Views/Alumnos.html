@@ -223,8 +223,8 @@
         <div class="modal-content">
             <span class="close" id="close-modal">&times;</span>
             <h2>Editar Alumno</h2>
-            <input type="hidden" id="edit-group-id">
-            <input readonly type="text" id="edit-group-name" placeholder="Nombre del grupo" required>
+            <input type="hidden" id="edit-student-id">
+            <input readonly type="text" id="edit-group-name" placeholder="Nombre del Alumno" required>
             <textarea readonly id="edit-group-description" placeholder="Descripción del grupo" required></textarea>
             <select id="edit-course-teacher" required>
                 <option value="">Seleccionar Grupo</option>
@@ -236,6 +236,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const apiUrl = 'http://54.163.22.51/api/v1/students'; // Reemplaza con la URL de tu API
+        const apiUrlDeleteStudents = 'http://54.163.22.51/api/v1/auth'; // Reemplaza con la URL de tu API
         const apiUrlGroups = 'http://54.163.22.51/api/v1/groups'; // Reemplaza con la URL de tu API
         const apiUrlGroupsStudent = 'http://54.163.22.51/api/v1/groupStudent'; // Reemplaza con la URL de tu API
         function fetchGroups(){
@@ -278,7 +279,7 @@
                             <div class="card-body">${group}</div>
                             <div class="card-footer">
                                 <button class="edit" onclick="openEditModal(${student.id}, '${student.name}', '${student.email}')">Editar</button>
-                                <button class="delete" onclick="deleteGroup(${student.id})">Eliminar</button>
+                                <button class="delete" onclick="deleteStudent(${student.id})">Eliminar</button>
                             </div>
                         `;
                         studentList.appendChild(card);
@@ -291,20 +292,21 @@
 
 
         // Eliminar un grupo
-        function deleteGroup(id) {
-            axios.delete(apiUrl, { data: { id } })
+        function deleteStudent(id) {
+            axios.delete(apiUrlDeleteStudents, { data: { id } })
                 .then(response => {
                     fetchStudents();
                 })
                 .catch(error => {
-                    console.error('Error al eliminar el grupo:', error);
+                    console.error('Error al eliminar el alumno:', error);
                     document.getElementById('error-message').textContent = 'Error al eliminar el alumno.';
                 });
+                console.log(id);
         }
 
         // Mostrar el modal de edición
         function openEditModal(id, name, description) {
-            document.getElementById('edit-group-id').value = id;
+            document.getElementById('edit-student-id').value = id;
             document.getElementById('edit-group-name').value = name;
             document.getElementById('edit-group-description').value = description;
             document.getElementById('edit-modal').style.display = 'block';
@@ -313,7 +315,7 @@
 
         // Guardar cambios del modal de edición
         function saveEdit() {
-            const id = document.getElementById('edit-group-id').value;
+            const id = document.getElementById('edit-student-id').value;
             const name = document.getElementById('edit-group-name').value;
             const email = document.getElementById('edit-group-description').value;
             const group = parseInt(document.getElementById('edit-course-teacher').value);
