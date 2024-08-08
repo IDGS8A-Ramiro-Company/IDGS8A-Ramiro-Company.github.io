@@ -26,7 +26,7 @@
         }
 
         .nav-container {
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -356,6 +356,13 @@
 
         // Cargar los grupos al inicio
         fetchGroups();
+
+        function logout() {
+            
+            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); 
+            window.location.href = '../Index.html'; 
+        }
     </script>
 </body>
 </html>

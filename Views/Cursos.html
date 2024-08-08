@@ -26,7 +26,7 @@
         }
 
         .nav-container {
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -214,6 +214,13 @@
             margin-bottom: 1rem;
         }
 
+        .progress-container {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -233,6 +240,11 @@
             background-color: #4caf50;
             border-radius: 5px;
         }
+        .progress-value {
+            position: absolute;
+            font-weight: bold;
+            color: black;
+        }
     </style>
 </head>
 
@@ -243,8 +255,9 @@
             <ul class="nav-links">
                 <li><a href="admin-dashboard.html">Inicio</a></li>
                 <li><a href="Grupos.html">Gestión de Grupos</a></li>
-                <li><a href="RegistroUsuarios.html">Gestión de Usuarios</a></li>
-                <li><a href="Cursos.html">Gestión de Cursos</a></li>
+                <li><a href="Cursos.html">Gestión de Cursos</a></li>                    
+                <li><a href="Alumnos.html">Gestión de Alumnos</a></li>
+                <li><a href="Registrar.html">Gestión de Usuarios</a></li>
                 <li><a onclick="logout()">Cerrar Sesion</a></li>
             </ul>
         </div>
@@ -335,14 +348,21 @@
                     const courseList = document.getElementById('course-list');
                     courseList.innerHTML = '';
                     courses.forEach(course => {
+                        const progressValue = parseInt(course.progress, 10);
                         const card = document.createElement('div');
                         card.classList.add('card');
                         card.innerHTML = `
                             <div class="card-header">${course.name}</div>
-                            <div class="card-body">${course.notes}</div>
-                            <div class="card-body">Grupo: ${course.group.name}</div>
-                            <div class="card-body">Profesor: ${course.teacher.name}</div>
-                            <div class="card-body"><progress class="progress-bar" value="${course.progress}" max="100"></progress></div>
+                            <div class="card-body"><b>Notas: </b>${course.notes}</div>
+                            <div class="card-body"><b>Grupo: </b> ${course.group.name}</div>
+                            <div class="card-body"><b>Profesor: </b> ${course.teacher.name}</div>                            
+
+                            <div class="card-body">
+    <div class="progress-container">
+        <progress class="progress-bar" id="progress-bar" value="${progressValue}" max="100"></progress>
+        <div class="progress-value" id="progress-value">${progressValue}%</div>
+    </div>
+</div>
                             
                             
                             <div class="card-footer">
@@ -520,6 +540,7 @@
         function closeActivitiesModal() {
             document.getElementById('activities-modal').style.display = 'none';
             document.getElementById('partials-modal').style.display = 'none';
+            fetchCourses();
         }
 
         // Crear un nuevo parcial
@@ -572,7 +593,7 @@
                         div.innerHTML = `
                             <div class="card-header">${activitie.name}</div>
                             <div class="card-footer">
-                                <div class="card-body">${activitie.description}</div>
+                                <div class="card-body"><b>Descripción: </b>${activitie.description}</div>
                                 <button class="delete" onclick="deleteActivitie(${activitie.id})">Eliminar</button>                                
                             </div>
                         `;
@@ -689,10 +710,10 @@
 
 
         function logout() {
-
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
-            window.location.href = 'https://idgs8a-ramiro-company.github.io/Login.html';
+            
+            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); 
+            window.location.href = '../Index.html'; 
         }
         // Inicialización
         fetchCourses();

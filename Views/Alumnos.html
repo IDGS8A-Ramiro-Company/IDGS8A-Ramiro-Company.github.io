@@ -25,8 +25,14 @@
             padding: 0.5rem 1rem;
         }
 
+        nav {
+            background-color: #33a559;
+            color: #fff;
+            padding: 0.5rem 1rem;
+        }
+
         .nav-container {
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -98,7 +104,7 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 1rem;
-            width: 500px;
+            width: 300px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -203,12 +209,14 @@
 <body>
     <nav>
         <div class="nav-container">
-            <h1>Gestión de Grupos</h1>
+            <h1>Gestión de Alumnos</h1>
             <ul class="nav-links">
                 <li><a href="admin-dashboard.html">Inicio</a></li>
                 <li><a href="Grupos.html">Gestión de Grupos</a></li>
+                <li><a href="Cursos.html">Gestión de Cursos</a></li>                    
                 <li><a href="Alumnos.html">Gestión de Alumnos</a></li>
-                <li><a href="Registrar.html">Registrar nuevo usuario</a></li>
+                <li><a href="Registrar.html">Gestión de Usuarios</a></li>
+                <li><a onclick="logout()">Cerrar Sesion</a></li>
             </ul>
         </div>
     </nav>
@@ -222,7 +230,7 @@
     <div id="edit-modal" class="modal">
         <div class="modal-content">
             <span class="close" id="close-modal">&times;</span>
-            <h2>Editar Alumno</h2>
+            <h2>Asignación de grupo</h2>
             <input type="hidden" id="edit-student-id">
             <input readonly type="text" id="edit-group-name" placeholder="Nombre del Alumno" required>
             <textarea readonly id="edit-group-description" placeholder="Descripción del grupo" required></textarea>
@@ -274,12 +282,12 @@
                         const card = document.createElement('div');
                         card.className = 'card';
                         card.innerHTML = `
-                            <div class="card-header">${student.name}</div>
-                            <div class="card-body">${student.email}</div>
-                            <div class="card-body">${group}</div>
+                            <div class="card-header"></div>
+                            <div class="card-body"><b>Nombre: </b>${student.name}</div>
+                            <div class="card-body"><b>Email: </b>${student.email}</div>
+                            <div class="card-body"><b>Grupo: </b>${group}</div>
                             <div class="card-footer">
-                                <button class="edit" onclick="openEditModal(${student.id}, '${student.name}', '${student.email}')">Editar</button>
-                                <button class="delete" onclick="deleteStudent(${student.id})">Eliminar</button>
+                                <button class="edit" onclick="openEditModal(${student.id}, '${student.name}', '${student.email}')">Asignar Grupo</button>                            
                             </div>
                         `;
                         studentList.appendChild(card);
@@ -291,18 +299,18 @@
         }
 
 
-        // Eliminar un grupo
-        function deleteStudent(id) {
-            axios.delete(apiUrlDeleteStudents, { data: { id } })
-                .then(response => {
-                    fetchStudents();
-                })
-                .catch(error => {
-                    console.error('Error al eliminar el alumno:', error);
-                    document.getElementById('error-message').textContent = 'Error al eliminar el alumno.';
-                });
-                console.log(id);
-        }
+        // // Eliminar un grupo
+        // function deleteStudent(id) {
+        //     axios.delete(apiUrlDeleteStudents, { data: { id } })
+        //         .then(response => {
+        //             fetchStudents();
+        //         })
+        //         .catch(error => {
+        //             console.error('Error al eliminar el alumno:', error);
+        //             document.getElementById('error-message').textContent = 'Error al eliminar el alumno.';
+        //         });
+        //         console.log(id);
+        // }
 
         // Mostrar el modal de edición
         function openEditModal(id, name, description) {
@@ -358,6 +366,12 @@
             }
         };
 
+        function logout() {
+            
+            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); 
+            window.location.href = '../Index.html'; 
+        }
         // Cargar los estudiantes al inicio
         fetchStudents();
     </script>
